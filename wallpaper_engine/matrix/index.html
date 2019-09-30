@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+
+<head>
+<canvas id="DigitalRain"></canvas>
+<style>
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	background-color: black;
+	overflow: hidden;
+}
+</style>
+
+<script>
+// Static variables start
+var c = document.getElementById("DigitalRain");
+var ctx = c.getContext("2d");
+var m_chars = decodeURIComponent("%E3%82%A2%E3%82%A4%E3%82%A6%E3%82%A8%E3%82%AA%E3%82%AB%E3%82%AD%E3%82%AF%E3%82%B1%E3%82%B3%E3%82%B5%E3%82%B7%E3%82%B9%E3%82%BB%E3%82%BD%E3%82%AC%E3%82%AE%E3%82%B0%E3%82%B2%E3%82%B4%E3%83%91%E3%83%94%E3%83%97%E3%83%9A%E3%83%9D%E3%82%A2%E3%82%A4%E3%82%A6%E3%82%A8%E3%82%AA%E3%82%AB%E3%82%AD%E3%82%AF%E3%82%B1%E3%82%B3%E3%82%B5%E3%82%B7%E3%82%B9%E3%82%BB%E3%82%BD%E3%82%AC%E3%82%AE%E3%82%B0%E3%82%B2%E3%82%B4%E3%83%91%E3%83%94%E3%83%97%E3%83%9A%E3%83%9D%E3%82%A2%E3%82%A4%E3%82%A6%E3%82%A8%E3%82%AA%E3%82%AB%E3%82%AD%E3%82%AF%E3%82%B1%E3%82%B3%E3%82%B5%E3%82%B7%E3%82%B9%E3%82%BB%E3%82%BD%E3%82%AC%E3%82%AE%E3%82%B0%E3%82%B2%E3%82%B4%E3%83%91%E3%83%94%E3%83%97%E3%83%9A%E3%83%9D%E3%82%A2%E3%82%A4%E3%82%A6%E3%82%A8%E3%82%AA%E3%82%AB%E3%82%AD%E3%82%AF%E3%82%B1%E3%82%B3%E3%82%B5%E3%82%B7%E3%82%B9%E3%82%BB%E3%82%BD%E3%82%AC%E3%82%AE%E3%82%B0%E3%82%B2%E3%82%B4%E3%83%91%E3%83%94%E3%83%97%E3%83%9A%E3%83%9D") + "123456789!#¤%&/()=?+£$€{}[]<>^*";
+var font_size = 18;
+var drops = [];
+var speeds = [];
+var speed_choices = [1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 2, 2.5, 2.8];
+var X_RANGE = 0;
+var Y_RANGE = 0;
+// Static variables end
+
+custom_chars = getParameterByName("custom_chars")
+if (custom_chars != undefined && custom_chars != "" && custom_chars != null) {
+	m_chars = custom_chars
+}
+m_chars = m_chars.split("");
+
+function getParameterByName(name, url) {
+	// https://stackoverflow.com/a/901144
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+function SetUp() {
+	c.height = window.innerHeight;
+	c.width = window.innerWidth;
+	var columns = c.width/font_size;
+	X_RANGE = columns;
+	Y_RANGE = c.height/font_size;
+
+	for(var x = 0; x < columns; x++) {
+		drops[x] = 0;
+		speeds[x] = speed_choices[Math.floor(Math.random() * 11)];
+	}
+}
+
+// Refresh before canvas filltext bug will crash wallpaper engine
+function refresh() {
+    window.location.reload(true);
+}
+
+
+window.onresize = function() {
+	  SetUp();
+};
+
+function ChangeRandomChar() {
+	ctx.fillStyle = "#00a028";
+	var randomY = Math.floor(Math.random() * Y_RANGE);
+	var randomX = Math.floor(Math.random() * X_RANGE);
+	var randomChar = m_chars[Math.floor(Math.random()*m_chars.length)];
+
+	ctx.clearRect(randomX*font_size, (randomY-speeds[randomX])*font_size, font_size, speeds[randomX]*font_size);
+	ctx.fillText(randomChar, randomX*font_size, (randomY-speeds[randomX])*font_size+font_size);
+}
+
+function Draw() {
+	ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+	ctx.fillRect(0, 0, c.width, c.height);
+	ctx.font = font_size + "px arial";
+
+	for(var j = 0; j < 6; j++) {
+		ChangeRandomChar();
+	}
+
+	for(var i = 0; i < drops.length; i++) {
+
+		var text1 = m_chars[Math.floor(Math.random()*m_chars.length)];
+		var text2 = m_chars[Math.floor(Math.random()*m_chars.length)];
+
+		ctx.fillStyle = "#FFFFFF";
+		ctx.fillText(text1, i*font_size, (((drops[i]-speeds[i])+1)+speeds[i])*font_size);
+		ctx.clearRect(i*font_size, (drops[i]-speeds[i])*font_size, font_size, speeds[i]*font_size);
+		ctx.fillStyle = "#0F0";
+		ctx.fillText(text2, i*font_size, ((drops[i]-speeds[i])+speeds[i])*font_size);
+
+		if(drops[i]*font_size > c.height && Math.random() > 0.95) {
+			speeds[i] = speed_choices[Math.floor(Math.random() * 11)];
+			drops[i] = 0;
+		}
+		drops[i] += speeds[i];
+	}
+}
+SetUp();
+setInterval(Draw, 40);
+setTimeout(refresh, 3600000);
+</script>
+
+</body>
+</html>
